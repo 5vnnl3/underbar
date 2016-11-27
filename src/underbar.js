@@ -283,20 +283,13 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var prevResults = [];
+    var prevResults = {};
     return function() {
-      var args = Array.from(arguments);
-      var alreadyCalled = _.some(prevResults, function(results) {
-        return (JSON.stringify(args) === JSON.stringify(results.args)) ? true : false;
-      });
-      if (alreadyCalled) {
+      var args = JSON.stringify(arguments);
+      if (args in prevResults) {
         return prevResults[args];
       } else {
-        var newResults = {};
-        newResults.args = args;
-        newResults.results = func.apply(this, arguments);
-        prevResults.push(newResults);
-        return newResults.results;
+        return prevResults[args] = func.apply(this, arguments);
       }
     }
   };
@@ -308,6 +301,10 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = Array.from(arguments).slice(2);
+    window.setTimeout(function() {
+      return func.apply(this, args);
+    }, wait);
   };
 
 
@@ -322,6 +319,14 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var shuffled = array.slice();
+     for(var i = 0; i < array.length; i++) {
+       var index = Math.floor(Math.random() * array.length);
+       var prior = shuffled[i];
+       shuffled[i] = shuffled[index]
+       shuffled[index] = prior;
+      }
+      return shuffled;
   };
 
 
